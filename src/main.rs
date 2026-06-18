@@ -73,10 +73,18 @@ struct AppState {
 }
 
 #[derive(Serialize)]
+struct MatchRange {
+    start: usize,
+    end: usize,
+    text: String,
+}
+
+#[derive(Serialize)]
 struct LogEntry {
     line_no: usize,
     level: String,
     message: String,
+    highlights: Vec<MatchRange>,
 }
 
 #[derive(Serialize)]
@@ -199,7 +207,7 @@ async fn get_logs(
         .q
         .as_deref()
         .filter(|s| !s.trim().is_empty())
-        .map(|s| s.to_ascii_lowercase());
+        .map(|s| s.to_string());
 
     let mut entries: Vec<LogEntry> = Vec::new();
     let mut total_scanned = 0usize;
@@ -225,16 +233,22 @@ async fn get_logs(
             }
         }
 
-        if let Some(ref needle) = needle {
-            if !line.to_ascii_lowercase().contains(needle) {
-                continue;
+        let highlights = match needle {
+            Some(ref n) => {
+                let ranges = find_keyword_matches(line, n);
+                if ranges.is_empty() {
+                    continue;
+                }
+                ranges
             }
-        }
+            None => Vec::new(),
+        };
 
         entries.push(LogEntry {
             line_no,
             level: parsed.map(Level::as_str).unwrap_or("UNKNOWN").to_string(),
             message: line.to_string(),
+            highlights,
         });
     }
 
@@ -255,6 +269,49 @@ async fn get_logs(
         count: entries.len(),
         entries,
     }))
+}
+
+fn find_keyword_matches(line: &str, needle: &str) -> Vec<MatchRange> {
+    if needle.is_empty() {
+        return Vec::new();
+    }
+    let nlen = needle.len();
+    let bytes = line.as_bytes();
+    let hlen = bytes.len();
+    let mut byte_ranges: Vec<(usize, usize)> = Vec::new();
+    let mut i = 0usize;
+    while i + nlen <= hlen {
+        if bytes[i..i + nlen].eq_ignore_ascii_case(needle.as_bytes()) {
+            byte_ranges.push((i, i + nlen));
+            i += nlen;
+        } else {
+            i += 1;
+        }
+    }
+    if byte_ranges.is_empty() {
+        return Vec::new();
+    }
+
+    let mut result: Vec<MatchRange> = Vec::with_capacity(byte_ranges.len());
+    let mut char_count = 0usize;
+    let mut last_byte = 0usize;
+    for (bs, be) in byte_ranges {
+        for _ in line[last_byte..bs].chars() {
+            char_count += 1;
+        }
+        let start = char_count;
+        let matched_text = &line[bs..be];
+        for _ in matched_text.chars() {
+            char_count += 1;
+        }
+        result.push(MatchRange {
+            start,
+            end: char_count,
+            text: matched_text.to_string(),
+        });
+        last_byte = be;
+    }
+    result
 }
 
 fn parse_line_level(line: &str) -> Option<Level> {
