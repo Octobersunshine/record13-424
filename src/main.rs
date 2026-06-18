@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering,
     fs,
+    io::Read,
     path::{Path, PathBuf},
     sync::Arc,
 };
@@ -166,8 +167,24 @@ async fn get_logs(
         .ok_or_else(|| (StatusCode::BAD_REQUEST, "invalid file name".to_string()))?;
 
     let path = state.logs_dir.join(&safe_name);
-    let content = fs::read_to_string(&path)
-        .map_err(|e| (StatusCode::NOT_FOUND, format!("read log failed: {}", e)))?;
+    let content = {
+        let mut file = fs::File::open(&path).map_err(|e| {
+            (
+                StatusCode::NOT_FOUND,
+                format!("log file not found (possibly rotated): {}", e),
+            )
+        })?;
+        let mut buf = Vec::new();
+        if let Ok(meta) = file.metadata() {
+            if let Ok(len) = usize::try_from(meta.len()) {
+                buf.reserve(len);
+            }
+        }
+        file.read_to_end(&mut buf)
+            .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, format!("read log failed: {}", e)))?;
+        drop(file);
+        String::from_utf8_lossy(&buf).into_owned()
+    };
 
     let requested_level = q.level.as_deref().and_then(Level::from_str_ci);
     if q.level.is_some() && requested_level.is_none() {
