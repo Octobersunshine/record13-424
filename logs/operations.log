@@ -1,0 +1,13 @@
+2024-01-15 10:23:45.123 [INFO] [auth] user login success id=42 ip=10.0.0.5
+2024-01-15 10:23:46.001 [DEBUG] [auth] session token issued for id=42 ttl=3600
+2024-01-15 10:24:01.456 [WARN] [auth] login retry threshold reached id=42 attempts=3
+2024-01-15 10:24:30.789 [ERROR] [db] connection refused: postgres://db:5432
+2024-01-15 10:25:00.000 [INFO] [order] order created order_id=9981 amount=120.50
+2024-01-15 10:25:10.111 [TRACE] [cache] cache hit key=user:42
+2024-01-15 10:26:00.222 [ERROR] [order] payment gateway timeout order_id=9981
+2024-01-15 10:26:05.333 [WARN] [order] retrying payment order_id=9981 attempt=2
+2024-01-15 10:26:30.444 [INFO] [order] payment succeeded order_id=9981
+{"ts":"2024-01-15T10:27:00.000Z","level":"warn","msg":"disk usage above 80%","service":"monitor"}
+{"ts":"2024-01-15T10:27:30.000Z","level":"error","msg":"cron job failed","service":"scheduler","exit_code":1}
+{"ts":"2024-01-15T10:28:00.000Z","level":"info","msg":"backup completed","service":"backup"}
+{"ts":"2024-01-15T10:28:30.000Z","level":"debug","msg":"gc pause 4ms","service":"runtime"}

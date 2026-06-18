@@ -1,0 +1,6 @@
+E:\temp\record13\424\target\debug\build\rustversion-9491ec4b48f7a9ba\build_script_build-9491ec4b48f7a9ba.d: C:\Users\wleim\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rustversion-1.0.22\build\build.rs C:\Users\wleim\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rustversion-1.0.22\build\rustc.rs
+
+E:\temp\record13\424\target\debug\build\rustversion-9491ec4b48f7a9ba\build_script_build-9491ec4b48f7a9ba.exe: C:\Users\wleim\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rustversion-1.0.22\build\build.rs C:\Users\wleim\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rustversion-1.0.22\build\rustc.rs
+
+C:\Users\wleim\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rustversion-1.0.22\build\build.rs:
+C:\Users\wleim\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rustversion-1.0.22\build\rustc.rs:
